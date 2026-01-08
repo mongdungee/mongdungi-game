@@ -216,6 +216,39 @@
     }
     a.fake{color:var(--accent); text-decoration:none; border-bottom:1px dashed rgba(106,167,255,.35)}
     .rightMini{font-size:12px;color:var(--muted)}
+    .overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.overlay.hidden{ display:none; }
+
+.overlayCard{
+  width: min(92vw, 420px);
+  border-radius: 18px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(10,14,24,.92);
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  padding: 18px;
+  text-align: center;
+}
+.overlayTitle{ font-weight: 900; font-size: 18px; margin-bottom: 10px; }
+.overlaySub{ color: var(--muted); font-size: 13px; margin: 10px 0 14px; }
+
+.spinner{
+  width: 44px; height: 44px;
+  margin: 0 auto;
+  border-radius: 999px;
+  border: 4px solid rgba(255,255,255,.12);
+  border-top-color: rgba(106,167,255,.95);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
   </style>
 </head>
 <body>
@@ -278,6 +311,10 @@
           <button class="badBtn" id="btnFlee" disabled>
             🏃 도망치기
             <span class="btnNote">전투 중 즉시 종료 (보상 감소)</span>
+          </button>
+          <button class="accent" id="btnOnline">
+            🌐 원격 배틀(랜덤매칭)
+              <span class="btnNote">상대 찾는 중이면 취소 가능</span>
           </button>
         </div>
 
@@ -1199,8 +1236,18 @@
 
 })();
 </script>
+  <div id="matchOverlay" class="overlay hidden">
+  <div class="overlayCard">
+    <div class="overlayTitle">상대 찾는 중…</div>
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="overlaySub">원격 배틀 모드에 진입한 사람끼리만 매칭됩니다.</div>
+    <button id="btnCancelMatch" class="smallBtn badBtn" style="text-align:center;">취소</button>
+  </div>
+</div>
+
 </body>
 </html>
+
 
 
 
