@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>몽둥이 키우기 (웹)</title>
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --panel:#121a2a;
+      --panel2:#0f1626;
+      --text:#e8eefc;
+      --muted:#a9b6d6;
+      --accent:#6aa7ff;
+      --good:#45d483;
+      --warn:#ffcd4a;
+      --bad:#ff5c77;
+      --line:rgba(255,255,255,.08);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background: radial-gradient(1200px 600px at 20% 0%, #132045 0%, var(--bg) 60%);
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      line-height:1.35;
+    }
+    header{
+      padding:20px 18px 10px;
+      max-width:1100px; margin:0 auto;
+      display:flex; gap:14px; align-items:flex-end; justify-content:space-between;
+    }
+    .title{
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .title h1{margin:0; font-size:20px; letter-spacing:-.4px}
+    .title .sub{color:var(--muted); font-size:13px}
+    .topbar{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .pill{
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      padding:8px 10px; border-radius:999px;
+      font-size:13px; color:var(--text);
+      display:flex; gap:8px; align-items:center;
+    }
+    .pill b{font-variant-numeric: tabular-nums}
+    .wrap{max-width:1100px; margin:0 auto; padding:10px 18px 22px;}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+    }
+    @media (max-width: 920px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 14px 10px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid var(--line);
+      background: rgba(0,0,0,.10);
+    }
+    .card .hd .h{
+      display:flex; flex-direction:column; gap:3px;
+    }
+    .card .hd .h .t{font-weight:700}
+    .card .hd .h .d{font-size:12px; color:var(--muted)}
+    .card .bd{padding:14px}
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .col{flex:1 1 240px}
+    .mono{font-variant-numeric: tabular-nums}
+    .bar{
+      height:10px; border-radius:999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .bar > i{
+      display:block; height:100%;
+      background: linear-gradient(90deg, rgba(106,167,255,.9), rgba(106,167,255,.3));
+      width:0%;
+    }
+    .bar.good > i{background: linear-gradient(90deg, rgba(69,212,131,.95), rgba(69,212,131,.25));}
+    .bar.warn > i{background: linear-gradient(90deg, rgba(255,205,74,.95), rgba(255,205,74,.25));}
+    .bar.bad  > i{background: linear-gradient(90deg, rgba(255,92,119,.95), rgba(255,92,119,.25));}
+
+    .stats{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 520px){
+      .stats{grid-template-columns:1fr}
+    }
+    .stat{
+      padding:10px 10px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.12);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+    }
+    .stat .k{color:var(--muted); font-size:12px}
+    .stat .v{font-weight:700}
+    .stat .v small{font-weight:600; color:var(--muted)}
+    .btns{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width:520px){
+      .btns{grid-template-columns:1fr}
+    }
+    button{
+      appearance:none; border:0; cursor:pointer;
+      border-radius:14px;
+      padding:12px 12px;
+      background: rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--text);
+      font-weight:700;
+      text-align:left;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+    }
+    button:hover{background: rgba(255,255,255,.10)}
+    button:active{transform: translateY(1px)}
+    button[disabled]{opacity:.45; cursor:not-allowed}
+    .btnNote{display:block; margin-top:4px; font-size:12px; color:var(--muted); font-weight:600}
+    .accent{border-color: rgba(106,167,255,.35); background: rgba(106,167,255,.12)}
+    .goodBtn{border-color: rgba(69,212,131,.30); background: rgba(69,212,131,.10)}
+    .warnBtn{border-color: rgba(255,205,74,.28); background: rgba(255,205,74,.10)}
+    .badBtn{border-color: rgba(255,92,119,.28); background: rgba(255,92,119,.10)}
+    .mini{
+      font-size:12px; color:var(--muted);
+    }
+    .log{
+      height:250px; overflow:auto;
+      padding:10px; border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.16);
+      font-size:12px;
+    }
+    .log p{margin:0 0 6px}
+    .tag{
+      display:inline-block; padding:2px 8px; border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      font-size:11px; color:var(--muted);
+      margin-right:6px;
+    }
+    .shop{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .item{
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.12);
+      border-radius:14px;
+      padding:10px;
+      display:flex; gap:10px; justify-content:space-between; align-items:center;
+    }
+    .item .info{display:flex; flex-direction:column; gap:4px}
+    .item .name{font-weight:800}
+    .item .desc{font-size:12px; color:var(--muted)}
+    .item .cost{font-size:12px; color:var(--muted)}
+    .item .buy{min-width:110px; text-align:center}
+    .split{
+      display:grid; grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .canvasWrap{
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    }
+    canvas{
+      width:160px; height:160px; border-radius:18px;
+      border:1px solid var(--line);
+      background: radial-gradient(100px 100px at 30% 20%, rgba(106,167,255,.25), rgba(0,0,0,.18));
+    }
+    .sideInfo{flex:1 1 220px}
+    .kv{
+      display:flex; justify-content:space-between; gap:10px;
+      padding:8px 10px; border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.12);
+      margin-bottom:8px;
+      font-size:13px;
+    }
+    .kv .k{color:var(--muted)}
+    .kv .v{font-weight:800}
+    .footerBtns{
+      display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;
+    }
+    .smallBtn{
+      padding:10px 10px; border-radius:12px; font-weight:800; font-size:13px;
+    }
+    .toast{
+      position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
+      background: rgba(0,0,0,.65);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:999px;
+      font-size:13px;
+      display:none;
+      max-width:min(92vw, 720px);
+      box-shadow: var(--shadow);
+    }
+    a.fake{color:var(--accent); text-decoration:none; border-bottom:1px dashed rgba(106,167,255,.35)}
+    .rightMini{font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <h1>몽둥이 키우기</h1>
+    <div class="sub">연마 → 전투 → 업그레이드 → 더 강한 몽둥이로 성장!</div>
+  </div>
+  <div class="topbar">
+    <div class="pill">🪙 코인 <b id="coins" class="mono">0</b></div>
+    <div class="pill">💎 젬 <b id="gems" class="mono">0</b></div>
+    <div class="pill">⭐ 명성 <b id="fame" class="mono">0</b></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- LEFT: 몽둥이/행동 -->
+    <section class="card">
+      <div class="hd">
+        <div class="h">
+          <div class="t">내 몽둥이</div>
+          <div class="d">레벨업과 업그레이드로 스탯이 바뀝니다.</div>
+        </div>
+        <div class="rightMini mono" id="saveHint">자동 저장됨</div>
+      </div>
+      <div class="bd">
+        <div class="canvasWrap">
+          <canvas id="cv" width="320" height="320" aria-label="몽둥이"></canvas>
+          <div class="sideInfo">
+            <div class="kv"><span class="k">등급</span><span class="v" id="grade">나무 막대</span></div>
+            <div class="kv"><span class="k">레벨</span><span class="v mono" id="level">1</span></div>
+            <div class="kv"><span class="k">공격력</span><span class="v mono" id="power">1</span></div>
+            <div class="kv"><span class="k">공격속도</span><span class="v mono" id="speed">1.00</span></div>
+            <div class="kv"><span class="k">치명타</span><span class="v mono" id="crit">5% ×1.5</span></div>
+            <div class="kv"><span class="k">내구도</span><span class="v mono" id="durTxt">100/100</span></div>
+
+            <div class="mini">경험치</div>
+            <div class="bar" id="xpBar"><i></i></div>
+            <div class="mini mono" id="xpTxt" style="margin-top:6px;">0 / 10</div>
+
+            <div class="mini" style="margin-top:10px;">내구도</div>
+            <div class="bar good" id="durBar"><i></i></div>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="accent" id="btnTrain">
+            🔨 연마하기
+            <span class="btnNote">공격력/경험치 ↑, 내구도 ↓</span>
+          </button>
+          <button class="goodBtn" id="btnRest">
+            🧰 수리하기
+            <span class="btnNote">코인으로 내구도 회복</span>
+          </button>
+          <button class="warnBtn" id="btnBattle">
+            🐲 전투 시작
+            <span class="btnNote">승리 시 코인/경험치 획득</span>
+          </button>
+          <button class="badBtn" id="btnFlee" disabled>
+            🏃 도망치기
+            <span class="btnNote">전투 중 즉시 종료 (보상 감소)</span>
+          </button>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <div class="col">
+            <div class="mini">전투 상태</div>
+            <div class="stat" style="margin-top:8px;">
+              <div>
+                <div class="k">적</div>
+                <div class="v" id="enemyName">-</div>
+              </div>
+              <div style="min-width:140px;">
+                <div class="k">적 체력</div>
+                <div class="bar bad" id="enemyBar" style="margin-top:6px;"><i></i></div>
+                <div class="mini mono" id="enemyHpTxt" style="margin-top:6px;">-</div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="mini">로그</div>
+            <div class="log" id="log" style="margin-top:8px;"></div>
+          </div>
+        </div>
+
+        <div class="footerBtns">
+          <button class="smallBtn" id="btnExport">📤 저장 내보내기</button>
+          <button class="smallBtn" id="btnImport">📥 저장 불러오기</button>
+          <button class="smallBtn" id="btnReset" title="정말 초기화합니다">🧨 초기화</button>
+          <span class="mini">팁: 업그레이드는 오른쪽 “상점”에서!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: 상점/업적 -->
+    <aside class="card">
+      <div class="hd">
+        <div class="h">
+          <div class="t">상점</div>
+          <div class="d">업그레이드로 성장 속도를 올리세요.</div>
+        </div>
+        <div class="rightMini">구매는 즉시 반영</div>
+      </div>
+      <div class="bd">
+        <div class="shop" id="shop"></div>
+
+        <div style="height:14px;"></div>
+
+        <div class="hd" style="margin:-14px -14px 12px; border-radius:14px; border:1px solid var(--line);">
+          <div class="h">
+            <div class="t">업적</div>
+            <div class="d">달성하면 보상을 줍니다.</div>
+          </div>
+          <div class="rightMini mono" id="achCount">0/0</div>
+        </div>
+        <div class="split" id="achs"></div>
+        <div class="mini" style="margin-top:10px;">
+          * 이 게임은 데모용이라 밸런스는 가볍게 잡았습니다. 원하면 “전투/상점/스탯” 더 확장해 드릴게요.
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Game Data ----------
+  const GRADES = [
+    { name: "나무 막대", minLv: 1,  color: "#caa46a" },
+    { name: "단단한 몽둥이", minLv: 5, color: "#d5b17a" },
+    { name: "강화 몽둥이", minLv: 10, color: "#b88a54" },
+    { name: "철테 몽둥이", minLv: 15, color: "#a7b0c5" },
+    { name: "가시 몽둥이", minLv: 20, color: "#c2c2c2" },
+    { name: "룬 각인 몽둥이", minLv: 30, color: "#6aa7ff" },
+  ];
+
+  const SHOP_ITEMS = [
+    {
+      id: "tape",
+      name: "강화 테이프",
+      desc: "최대 내구도 +25, 수리비 -5%",
+      baseCost: 60,
+      growth: 1.35,
+      max: 10,
+      apply(state, n){
+        state.stick.maxDur += 25;
+        state.economy.repairDiscount = clamp(state.economy.repairDiscount + 0.05, 0, 0.40);
+      }
+    },
+    {
+      id: "iron",
+      name: "쇠테두리",
+      desc: "공격력 +2 (구매마다 누적)",
+      baseCost: 90,
+      growth: 1.40,
+      max: 12,
+      apply(state, n){
+        state.stick.power += 2;
+      }
+    },
+    {
+      id: "nails",
+      name: "못 박기",
+      desc: "치명타 확률 +2%",
+      baseCost: 140,
+      growth: 1.45,
+      max: 10,
+      apply(state, n){
+        state.stick.critChance = clamp(state.stick.critChance + 0.02, 0.05, 0.45);
+      }
+    },
+    {
+      id: "oil",
+      name: "윤활제",
+      desc: "공격속도 +0.06",
+      baseCost: 170,
+      growth: 1.45,
+      max: 10,
+      apply(state, n){
+        state.stick.speed += 0.06;
+      }
+    },
+    {
+      id: "rune",
+      name: "마법 룬",
+      desc: "치명타 배수 +0.1, 젬 1개 소모",
+      baseCost: 0,
+      growth: 1,
+      max: 12,
+      special: "gems",
+      gemCost: (owned) => 1,
+      apply(state, n){
+        state.stick.critMult += 0.10;
+      }
+    },
+    {
+      id: "badge",
+      name: "용사 배지",
+      desc: "명성 +3, 전투 보상 코인 +3%",
+      baseCost: 240,
+      growth: 1.55,
+      max: 15,
+      apply(state, n){
+        state.resources.fame += 3;
+        state.economy.rewardBonus = clamp(state.economy.rewardBonus + 0.03, 0, 0.60);
+      }
+    },
+  ];
+
+  const ACHIEVEMENTS = [
+    { id:"lv5",  name:"첫 성장",        desc:"레벨 5 달성",      check:s=>s.stick.level>=5,  reward:{coins:120} },
+    { id:"lv10", name:"제법 몽둥이",     desc:"레벨 10 달성",     check:s=>s.stick.level>=10, reward:{gems:1} },
+    { id:"lv20", name:"진짜 몽둥이",     desc:"레벨 20 달성",     check:s=>s.stick.level>=20, reward:{coins:900, gems:1} },
+    { id:"win10",name:"전투의 감각",     desc:"전투 10승",        check:s=>s.stats.wins>=10,  reward:{coins:350} },
+    { id:"win30",name:"베테랑",          desc:"전투 30승",        check:s=>s.stats.wins>=30,  reward:{gems:2} },
+    { id:"train200",name:"연마 장인",    desc:"연마 200회",       check:s=>s.stats.trains>=200,reward:{coins:600} },
+    { id:"rich", name:"주머니가 묵직",   desc:"코인 5,000 보유",  check:s=>s.resources.coins>=5000, reward:{gems:1} },
+  ];
+
+  function defaultState(){
+    return {
+      version: 1,
+      resources: { coins: 0, gems: 0, fame: 0 },
+      stick: {
+        level: 1,
+        xp: 0,
+        power: 1,
+        speed: 1.00,        // attacks per second baseline
+        critChance: 0.05,
+        critMult: 1.50,
+        dur: 100,
+        maxDur: 100,
+      },
+      shopOwned: {}, // id -> count
+      economy: {
+        rewardBonus: 0,        // extra coin reward %
+        repairDiscount: 0,     // repair cost discount %
+      },
+      battle: {
+        inBattle: false,
+        enemy: null,
+        enemyHp: 0,
+        enemyMaxHp: 0,
+        fleePenalty: 0,
+        nextAtkAt: 0,
+        nextEnemyAtkAt: 0,
+      },
+      stats: {
+        wins: 0,
+        losses: 0,
+        trains: 0,
+      },
+      achClaimed: {}, // id -> true
+      log: []
+    };
+  }
+
+  const SAVE_KEY = "mongdungi_game_save_v1";
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(SAVE_KEY);
+      if(!raw) return defaultState();
+      const s = JSON.parse(raw);
+      // 최소한의 방어적 병합
+      const d = defaultState();
+      return deepMerge(d, s);
+    }catch(e){
+      return defaultState();
+    }
+  }
+
+  function saveState(){
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    $("saveHint").textContent = "자동 저장됨";
+    setTimeout(()=> $("saveHint").textContent = "자동 저장됨", 600);
+  }
+
+  function deepMerge(base, patch){
+    if(typeof base !== "object" || base === null) return patch;
+    const out = Array.isArray(base) ? [...base] : {...base};
+    for(const k of Object.keys(patch || {})){
+      const v = patch[k];
+      if(v && typeof v === "object" && !Array.isArray(v) && base[k] && typeof base[k] === "object" && !Array.isArray(base[k])){
+        out[k] = deepMerge(base[k], v);
+      }else{
+        out[k] = v;
+      }
+    }
+    return out;
+  }
+
+  function clamp(x, a, b){ return Math.max(a, Math.min(b, x)); }
+  function fmt(n){
+    // 간단한 표기: 1,234 / 12.3K / 4.5M
+    const abs = Math.abs(n);
+    if(abs >= 1e9) return (n/1e9).toFixed(2) + "B";
+    if(abs >= 1e6) return (n/1e6).toFixed(2) + "M";
+    if(abs >= 1e3) return (n/1e3).toFixed(2) + "K";
+    return Math.floor(n).toLocaleString("ko-KR");
+  }
+
+  function toast(msg){
+    const t = $("toast");
+    t.textContent = msg;
+    t.style.display = "block";
+    clearTimeout(toast._tm);
+    toast._tm = setTimeout(()=> t.style.display = "none", 1600);
+  }
+
+  // ---------- Rendering ----------
+  function currentGradeName(lv){
+    let g = GRADES[0];
+    for(const it of GRADES){
+      if(lv >= it.minLv) g = it;
+    }
+    return g.name;
+  }
+
+  function xpToNext(level){
+    // 완만한 증가
+    return Math.floor(10 + Math.pow(level, 1.35) * 7);
+  }
+
+  function updateBars(){
+    const xpNeed = xpToNext(state.stick.level);
+    const xpPct = clamp((state.stick.xp / xpNeed) * 100, 0, 100);
+    $("xpBar").querySelector("i").style.width = xpPct.toFixed(1) + "%";
+    $("xpTxt").textContent = `${Math.floor(state.stick.xp)} / ${xpNeed}`;
+
+    const durPct = clamp((state.stick.dur / state.stick.maxDur) * 100, 0, 100);
+    const durBar = $("durBar");
+    durBar.querySelector("i").style.width = durPct.toFixed(1) + "%";
+    durBar.classList.remove("good","warn","bad");
+    if(durPct >= 55) durBar.classList.add("good");
+    else if(durPct >= 25) durBar.classList.add("warn");
+    else durBar.classList.add("bad");
+
+    if(state.battle.enemy){
+      const ePct = clamp((state.battle.enemyHp / state.battle.enemyMaxHp)*100, 0, 100);
+      $("enemyBar").querySelector("i").style.width = ePct.toFixed(1) + "%";
+      $("enemyHpTxt").textContent = `${Math.max(0, Math.floor(state.battle.enemyHp))} / ${state.battle.enemyMaxHp}`;
+    }else{
+      $("enemyBar").querySelector("i").style.width = "0%";
+      $("enemyHpTxt").textContent = "-";
+    }
+  }
+
+  function setTexts(){
+    $("coins").textContent = fmt(state.resources.coins);
+    $("gems").textContent  = fmt(state.resources.gems);
+    $("fame").textContent  = fmt(state.resources.fame);
+
+    $("grade").textContent = currentGradeName(state.stick.level);
+    $("level").textContent = String(state.stick.level);
+    $("power").textContent = fmt(state.stick.power);
+    $("speed").textContent = state.stick.speed.toFixed(2);
+    $("crit").textContent  = `${Math.round(state.stick.critChance*100)}% ×${state.stick.critMult.toFixed(1)}`;
+    $("durTxt").textContent = `${Math.floor(state.stick.dur)}/${state.stick.maxDur}`;
+
+    if(state.battle.enemy){
+      $("enemyName").textContent = state.battle.enemy.name;
+    }else{
+      $("enemyName").textContent = "-";
+    }
+
+    // 버튼 상태
+    $("btnTrain").disabled = state.stick.dur <= 0 || state.battle.inBattle;
+    $("btnRest").disabled  = state.battle.inBattle;
+    $("btnBattle").disabled = state.battle.inBattle || state.stick.dur <= 0;
+    $("btnFlee").disabled = !state.battle.inBattle;
+
+    // 로그
+    const logEl = $("log");
+    logEl.innerHTML = state.log.slice(-120).map(line => `<p>${line}</p>`).join("");
+    logEl.scrollTop = logEl.scrollHeight;
+
+    // 업적
+    const total = ACHIEVEMENTS.length;
+    const done = ACHIEVEMENTS.filter(a => !!state.achClaimed[a.id]).length;
+    $("achCount").textContent = `${done}/${total}`;
+  }
+
+  function addLog(tag, msg){
+    const color = tag === "전투" ? "#ffcd4a" : tag === "성장" ? "#45d483" : tag === "상점" ? "#6aa7ff" : "#a9b6d6";
+    state.log.push(`<span class="tag" style="color:${color}; border-color:rgba(255,255,255,.10)">${tag}</span>${msg}`);
+  }
+
+  // ---------- Canvas Drawing ----------
+  function drawStick(){
+    const cv = $("cv");
+    const ctx = cv.getContext("2d");
+    const W = cv.width, H = cv.height;
+    ctx.clearRect(0,0,W,H);
+
+    // Glow background particles
+    ctx.save();
+    for(let i=0;i<18;i++){
+      const x = (Math.sin(i*12.3 + state.stick.level)*0.5+0.5)*W;
+      const y = (Math.cos(i*9.7 + state.stick.level*0.7)*0.5+0.5)*H;
+      const r = 4 + (i%4);
+      ctx.globalAlpha = 0.08;
+      ctx.beginPath();
+      ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Stick
+    const grade = GRADES.reduce((a,g)=> state.stick.level>=g.minLv?g:a, GRADES[0]);
+    const baseColor = grade.color;
+
+    // body
+    ctx.save();
+    ctx.translate(W/2, H/2+20);
+    ctx.rotate(-0.45);
+
+    // shadow
+    ctx.globalAlpha = 0.18;
+    roundRect(ctx, -26, -110, 52, 210, 22);
+    ctx.fillStyle = "#000";
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // wood body
+    const bodyW = 44, bodyH = 200;
+    roundRect(ctx, -bodyW/2, -bodyH/2, bodyW, bodyH, 20);
+    ctx.fillStyle = baseColor;
+    ctx.fill();
+
+    // grain lines
+    ctx.globalAlpha = 0.18;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 3;
+    for(let i=-14;i<=14;i+=7){
+      ctx.beginPath();
+      ctx.moveTo(i, -88);
+      ctx.quadraticCurveTo(i+6, -20, i-4, 50);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // upgrades visuals
+    const owned = state.shopOwned;
+
+    // iron rings (iron)
+    if((owned.iron||0) > 0){
+      ctx.fillStyle = "rgba(220,230,255,.85)";
+      for(let k=0;k<Math.min(3, owned.iron);k++){
+        const y = -70 + k*55;
+        roundRect(ctx, -28, y, 56, 14, 8);
+        ctx.fill();
+      }
+    }
+
+    // nails/spikes
+    if((owned.nails||0) > 0){
+      ctx.fillStyle = "rgba(255,255,255,.9)";
+      const spikes = Math.min(10, 3 + (owned.nails||0));
+      for(let i=0;i<spikes;i++){
+        const y = -80 + i*18;
+        ctx.beginPath();
+        ctx.moveTo(22, y);
+        ctx.lineTo(38, y+6);
+        ctx.lineTo(22, y+12);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    // tape
+    if((owned.tape||0) > 0){
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = "rgba(255,205,74,.75)";
+      const wraps = Math.min(4, 1 + Math.floor((owned.tape||0)/2));
+      for(let i=0;i<wraps;i++){
+        const y = 20 + i*26;
+        roundRect(ctx, -30, y, 60, 12, 8);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // rune glow
+    if((owned.rune||0) > 0){
+      ctx.save();
+      ctx.globalAlpha = 0.25;
+      ctx.fillStyle = "#6aa7ff";
+      for(let i=0;i<6;i++){
+        const y = -30 + i*26;
+        ctx.beginPath();
+        ctx.arc(0,y,10,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(106,167,255,.9)";
+      ctx.lineWidth = 2;
+      for(let i=0;i<4;i++){
+        const y = -20 + i*40;
+        ctx.beginPath();
+        ctx.moveTo(-10,y); ctx.lineTo(10,y);
+        ctx.moveTo(0,y-10); ctx.lineTo(0,y+10);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    ctx.restore();
+
+    // title small
+    ctx.save();
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = "rgba(255,255,255,.8)";
+    ctx.font = "700 16px system-ui, sans-serif";
+    ctx.fillText("Lv." + state.stick.level, 14, 26);
+    ctx.globalAlpha = 0.8;
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.fillText(currentGradeName(state.stick.level), 14, 46);
+    ctx.restore();
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr, y);
+    ctx.arcTo(x+w, y, x+w, y+h, rr);
+    ctx.arcTo(x+w, y+h, x, y+h, rr);
+    ctx.arcTo(x, y+h, x, y, rr);
+    ctx.arcTo(x, y, x+w, y, rr);
+    ctx.closePath();
+  }
+
+  // ---------- Mechanics ----------
+  function levelUpIfNeeded(){
+    let leveled = false;
+    while(true){
+      const need = xpToNext(state.stick.level);
+      if(state.stick.xp < need) break;
+
+      state.stick.xp -= need;
+      state.stick.level += 1;
+
+      // 레벨업 보상: 기본 스탯 소폭 증가
+      state.stick.power += 1 + Math.floor(state.stick.level/6);
+      state.stick.maxDur += 6 + Math.floor(state.stick.level/4);
+      state.stick.dur = clamp(state.stick.dur + Math.floor(state.stick.maxDur*0.25), 0, state.stick.maxDur);
+
+      // 낮은 확률 젬 드랍
+      if(Math.random() < 0.08){
+        state.resources.gems += 1;
+        addLog("성장", `레벨업 보너스로 💎 젬 1개를 얻었습니다!`);
+      }
+
+      addLog("성장", `레벨 ${state.stick.level} 달성! 공격력/최대내구도 상승`);
+      leveled = true;
+    }
+    if(leveled) toast("레벨업!");
+  }
+
+  function train(){
+    if(state.battle.inBattle) return;
+    if(state.stick.dur <= 0){
+      toast("내구도가 0이라 연마할 수 없어요. 수리하세요.");
+      return;
+    }
+
+    state.stats.trains += 1;
+
+    // 연마 보상: 소량 공격력 성장 + 경험치
+    const gainXp = 2 + Math.random()*2;
+    state.stick.xp += gainXp;
+
+    // 연마로 공격력 성장(완만)
+    const powGain = 0.18 + Math.sqrt(state.stick.level)*0.03;
+    state.stick.power += powGain;
+
+    // 내구도 소모
+    const costDur = 3 + Math.floor(state.stick.level/8);
+    state.stick.dur = clamp(state.stick.dur - costDur, 0, state.stick.maxDur);
+
+    addLog("연마", `연마! 공격력 +${powGain.toFixed(2)}, 경험치 +${Math.floor(gainXp)} (내구도 -${costDur})`);
+
+    levelUpIfNeeded();
+    checkAchievements();
+    saveState();
+    render();
+  }
+
+  function repair(){
+    if(state.battle.inBattle) return;
+
+    const missing = state.stick.maxDur - state.stick.dur;
+    if(missing <= 0){
+      toast("이미 내구도가 가득해요.");
+      return;
+    }
+
+    // 수리비: 결손 내구도 비례 + 레벨
+    const base = Math.ceil(missing * (0.65 + state.stick.level*0.02));
+    const discounted = Math.ceil(base * (1 - state.economy.repairDiscount));
+
+    if(state.resources.coins < discounted){
+      toast(`코인이 부족해요. 필요: ${discounted.toLocaleString("ko-KR")}`);
+      return;
+    }
+
+    state.resources.coins -= discounted;
+    state.stick.dur = state.stick.maxDur;
+
+    addLog("연마", `수리 완료! 내구도 전부 회복 (비용 🪙 ${discounted.toLocaleString("ko-KR")})`);
+    toast("수리 완료");
+    checkAchievements();
+    saveState();
+    render();
+  }
+
+  function makeEnemy(){
+    // 레벨 기반 난이도
+    const lv = state.stick.level;
+    const tier = Math.floor((lv-1)/5);
+    const names = [
+      ["젤리 슬라임","초보 도적","야생 토끼"],
+      ["산적","독버섯","바위 골렘"],
+      ["그림자 늑대","불꽃 임프","철갑 슬라임"],
+      ["심연 기사","룬 비스트","폭주 골렘"],
+    ];
+    const list = names[Math.min(names.length-1, tier)];
+    const name = list[Math.floor(Math.random()*list.length)];
+
+    // 적 체력/공격력
+    const hp = Math.floor(40 + lv*14 + Math.pow(lv, 1.22)*6);
+    const atk = Math.max(1, Math.floor(3 + lv*1.4 + tier*3));
+    const rewardCoins = Math.floor(25 + lv*12 + tier*30);
+    const rewardXp = Math.floor(8 + lv*3);
+
+    return { name, hp, atk, rewardCoins, rewardXp, tier };
+  }
+
+  function startBattle(){
+    if(state.battle.inBattle) return;
+    if(state.stick.dur <= 0){
+      toast("내구도가 0이라 전투할 수 없어요. 수리하세요.");
+      return;
+    }
+
+    const enemy = makeEnemy();
+    state.battle.inBattle = true;
+    state.battle.enemy = enemy;
+    state.battle.enemyHp = enemy.hp;
+    state.battle.enemyMaxHp = enemy.hp;
+    state.battle.fleePenalty = 0;
+    const now = performance.now();
+    state.battle.nextAtkAt = now + 500;
+    state.battle.nextEnemyAtkAt = now + 800;
+
+    addLog("전투", `${enemy.name} 등장! (HP ${enemy.hp}, ATK ${enemy.atk})`);
+    toast("전투 시작!");
+    saveState();
+    render();
+  }
+
+  function flee(){
+    if(!state.battle.inBattle) return;
+    state.battle.fleePenalty = 0.55; // 보상 55% 감소
+    addLog("전투", `도망쳤습니다! (보상 크게 감소)`);
+    endBattle(false, true);
+  }
+
+  function rollCrit(){
+    return Math.random() < state.stick.critChance;
+  }
+
+  function battleTick(now){
+    if(!state.battle.inBattle || !state.battle.enemy) return;
+
+    // 플레이어 공격
+    const atkInterval = 1000 / Math.max(0.2, state.stick.speed);
+    if(now >= state.battle.nextAtkAt){
+      state.battle.nextAtkAt = now + atkInterval;
+
+      let dmg = state.stick.power;
+      const crit = rollCrit();
+      if(crit) dmg *= state.stick.critMult;
+
+      dmg = Math.max(1, Math.floor(dmg));
+      state.battle.enemyHp -= dmg;
+
+      addLog("전투", `공격! ${crit ? "치명타!! " : ""}적에게 ${dmg} 피해`);
+
+      if(state.battle.enemyHp <= 0){
+        endBattle(true, false);
+        return;
+      }
+    }
+
+    // 적 공격 (내구도 감소)
+    const enemyInterval = 1200;
+    if(now >= state.battle.nextEnemyAtkAt){
+      state.battle.nextEnemyAtkAt = now + enemyInterval;
+
+      const e = state.battle.enemy;
+      const dmgToDur = e.atk + Math.floor(e.tier*1.5);
+      state.stick.dur = clamp(state.stick.dur - dmgToDur, 0, state.stick.maxDur);
+
+      addLog("전투", `피격! 내구도 -${dmgToDur}`);
+
+      if(state.stick.dur <= 0){
+        endBattle(false, false);
+        return;
+      }
+    }
+  }
+
+  function endBattle(victory, fled){
+    const e = state.battle.enemy;
+    if(!e){ resetBattle(); return; }
+
+    if(victory){
+      state.stats.wins += 1;
+
+      let coins = e.rewardCoins;
+      coins = Math.floor(coins * (1 + state.economy.rewardBonus));
+      if(state.battle.fleePenalty) coins = Math.floor(coins * (1 - state.battle.fleePenalty));
+
+      let xp = e.rewardXp;
+      if(state.battle.fleePenalty) xp = Math.floor(xp * (1 - state.battle.fleePenalty));
+
+      state.resources.coins += coins;
+      state.stick.xp += xp;
+
+      // 젬 드랍(소확률)
+      const gemDrop = Math.random() < (0.08 + Math.min(0.12, state.resources.fame/1000));
+      if(gemDrop){
+        state.resources.gems += 1;
+        addLog("전투", `전리품으로 💎 젬 1개 획득!`);
+      }
+
+      // 명성 약간
+      const fameGain = 1 + Math.floor(e.tier/2);
+      state.resources.fame += fameGain;
+
+      addLog("전투", `승리! 보상: 🪙 ${coins.toLocaleString("ko-KR")}, XP ${xp}, ⭐ ${fameGain}`);
+      toast("승리!");
+      levelUpIfNeeded();
+    }else{
+      state.stats.losses += 1;
+      if(fled){
+        addLog("전투", `패배 처리(도주). 다음엔 더 강해져서 오자!`);
+        toast("도주!");
+      }else{
+        addLog("전투", `패배… 내구도가 0이 되었습니다. 수리 후 재도전!`);
+        toast("패배…");
+      }
+    }
+
+    resetBattle();
+    checkAchievements();
+    saveState();
+    render();
+  }
+
+  function resetBattle(){
+    state.battle.inBattle = false;
+    state.battle.enemy = null;
+    state.battle.enemyHp = 0;
+    state.battle.enemyMaxHp = 0;
+    state.battle.fleePenalty = 0;
+  }
+
+  function buyItem(itemId){
+    const item = SHOP_ITEMS.find(x => x.id === itemId);
+    if(!item) return;
+
+    const owned = state.shopOwned[itemId] || 0;
+    if(owned >= item.max){
+      toast("최대 구매 횟수에 도달했습니다.");
+      return;
+    }
+
+    // cost
+    if(item.special === "gems"){
+      const needG = item.gemCost(owned);
+      if(state.resources.gems < needG){
+        toast(`젬이 부족해요. 필요: ${needG}`);
+        return;
+      }
+      state.resources.gems -= needG;
+      state.shopOwned[itemId] = owned + 1;
+      item.apply(state, owned + 1);
+      addLog("상점", `${item.name} 구매! (💎 -${needG})`);
+      toast("구매 완료");
+    }else{
+      const cost = Math.floor(item.baseCost * Math.pow(item.growth, owned));
+      if(state.resources.coins < cost){
+        toast(`코인이 부족해요. 필요: ${cost.toLocaleString("ko-KR")}`);
+        return;
+      }
+      state.resources.coins -= cost;
+      state.shopOwned[itemId] = owned + 1;
+      item.apply(state, owned + 1);
+      addLog("상점", `${item.name} 구매! (🪙 -${cost.toLocaleString("ko-KR")})`);
+      toast("구매 완료");
+    }
+
+    // 내구도 상한 늘어나면 현재 내구도도 약간 보정
+    state.stick.dur = clamp(state.stick.dur, 0, state.stick.maxDur);
+
+    checkAchievements();
+    saveState();
+    render();
+  }
+
+  function buildShop(){
+    const wrap = $("shop");
+    wrap.innerHTML = "";
+    for(const it of SHOP_ITEMS){
+      const owned = state.shopOwned[it.id] || 0;
+
+      let costText = "";
+      let canBuy = owned < it.max;
+
+      if(it.special === "gems"){
+        const gNeed = it.gemCost(owned);
+        costText = `비용: 💎 ${gNeed} | 보유: ${state.resources.gems}`;
+        if(state.resources.gems < gNeed) canBuy = false;
+      }else{
+        const cost = Math.floor(it.baseCost * Math.pow(it.growth, owned));
+        costText = `비용: 🪙 ${cost.toLocaleString("ko-KR")} | 보유: ${state.resources.coins.toLocaleString("ko-KR")}`;
+        if(state.resources.coins < cost) canBuy = false;
+      }
+
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="info">
+          <div class="name">${it.name} <span class="mini mono">(${owned}/${it.max})</span></div>
+          <div class="desc">${it.desc}</div>
+          <div class="cost mono">${costText}</div>
+        </div>
+        <button class="buy ${canBuy ? "accent" : ""}" ${canBuy ? "" : "disabled"}>구매</button>
+      `;
+      div.querySelector("button").addEventListener("click", () => buyItem(it.id));
+      wrap.appendChild(div);
+    }
+  }
+
+  function checkAchievements(){
+    for(const a of ACHIEVEMENTS){
+      if(state.achClaimed[a.id]) continue;
+      if(!a.check(state)) continue;
+
+      state.achClaimed[a.id] = true;
+
+      if(a.reward.coins) state.resources.coins += a.reward.coins;
+      if(a.reward.gems)  state.resources.gems  += a.reward.gems;
+      if(a.reward.fame)  state.resources.fame  += a.reward.fame;
+
+      const parts = [];
+      if(a.reward.coins) parts.push(`🪙 ${a.reward.coins.toLocaleString("ko-KR")}`);
+      if(a.reward.gems)  parts.push(`💎 ${a.reward.gems}`);
+      if(a.reward.fame)  parts.push(`⭐ ${a.reward.fame}`);
+      addLog("성장", `업적 달성: <b>${a.name}</b> (보상: ${parts.join(", ")})`);
+      toast("업적 달성!");
+    }
+  }
+
+  function buildAchievements(){
+    const wrap = $("achs");
+    wrap.innerHTML = "";
+    for(const a of ACHIEVEMENTS){
+      const claimed = !!state.achClaimed[a.id];
+      const ok = a.check(state);
+      const reward = [];
+      if(a.reward.coins) reward.push(`🪙${a.reward.coins}`);
+      if(a.reward.gems)  reward.push(`💎${a.reward.gems}`);
+      if(a.reward.fame)  reward.push(`⭐${a.reward.fame}`);
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="info">
+          <div class="name">${claimed ? "✅" : ok ? "🟨" : "⬜"} ${a.name}</div>
+          <div class="desc">${a.desc}</div>
+          <div class="cost mono">보상: ${reward.join(" ")}</div>
+        </div>
+        <div class="mini mono" style="min-width:90px; text-align:right;">
+          ${claimed ? "완료" : ok ? "달성!" : "진행중"}
+        </div>
+      `;
+      wrap.appendChild(div);
+    }
+  }
+
+  // ---------- Import/Export/Reset ----------
+  function exportSave(){
+    const data = JSON.stringify(state);
+    navigator.clipboard?.writeText(data).then(()=>{
+      toast("클립보드에 저장 데이터 복사 완료!");
+    }).catch(()=>{
+      prompt("아래 내용을 복사해서 보관하세요.", data);
+    });
+  }
+
+  function importSave(){
+    const raw = prompt("저장 데이터를 붙여넣으세요 (JSON).");
+    if(!raw) return;
+    try{
+      const parsed = JSON.parse(raw);
+      state = deepMerge(defaultState(), parsed);
+      saveState();
+      addLog("성장", `저장 불러오기 완료`);
+      toast("불러오기 완료");
+      render();
+    }catch(e){
+      toast("저장 데이터가 올바른 JSON이 아닙니다.");
+    }
+  }
+
+  function resetAll(){
+    const ok = confirm("정말 초기화할까요? (되돌릴 수 없음)");
+    if(!ok) return;
+    state = defaultState();
+    saveState();
+    toast("초기화 완료");
+    render();
+  }
+
+  // ---------- Main Loop ----------
+  let state = loadState();
+
+  function render(){
+    setTexts();
+    updateBars();
+    buildShop();
+    buildAchievements();
+    drawStick();
+  }
+
+  // 버튼 바인딩
+  $("btnTrain").addEventListener("click", train);
+  $("btnRest").addEventListener("click", repair);
+  $("btnBattle").addEventListener("click", startBattle);
+  $("btnFlee").addEventListener("click", flee);
+  $("btnExport").addEventListener("click", exportSave);
+  $("btnImport").addEventListener("click", importSave);
+  $("btnReset").addEventListener("click", resetAll);
+
+  // 최초 렌더
+  addLog("성장", `게임 시작! <span class="mini">(팁: 먼저 연마로 레벨을 올리고, 상점에서 강화하세요.)</span>`);
+  render();
+  saveState();
+
+  // 애니메이션/전투 루프
+  function frame(now){
+    battleTick(now);
+    // 전투 중에는 주기적으로 저장/렌더 (과도하지 않게)
+    if(state.battle.inBattle){
+      render();
+      // 자동 저장(느슨하게)
+      if(!frame._lastSave || (now - frame._lastSave) > 2000){
+        frame._lastSave = now;
+        saveState();
+      }
+    }else{
+      // 전투 없으면 가끔만 렌더(업적/바 보정)
+      if(!frame._lastIdle || (now - frame._lastIdle) > 1200){
+        frame._lastIdle = now;
+        render();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
